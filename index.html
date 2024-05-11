@@ -1,0 +1,348 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+  <script src="./table.js"></script>
+</head>
+
+<body>
+<h1>crypt0</h1>
+
+<div class="textarea-wrapper keyword-input">
+    <p>Keyword:</p>
+    <textarea spellcheck="false" rows="1" cols="33" type="text" id="keywordText" name="text" required minlength="1" maxlength="99" size="25" ></textarea> <!--<button id="keywordBtn">Keyword</button>-->
+</div>
+<div class="textarea-wrapper plaintext-input">
+    <p>Plaintext <br />to encode:</p>
+    <textarea spellcheck="false" rows="1" cols="33" type="text" id="plaintext" name="text" required minlength="1" maxlength="99" size="25" ></textarea> <button id="encodeBtn">Encode</button>
+</div>
+<div class="textarea-wrapper decoded-text-input">
+    <p>Decoded text:</p>
+    <textarea spellcheck="false" rows="1" cols="33" type="text" id="decodetext" name="text" required minlength="1" maxlength="99" size="25" ></textarea> <button id="decodeBtn">Decode</button>
+</div>
+
+<div class="encrypted-output-wrapper">
+    <p><strong>encoded text</strong></p>
+    <p class="encrypted-text" id="encrypted-output">
+    </p>
+</div>
+
+<div class="decrypted-output-wrapper">
+    <p><strong>decoded text</strong></p>
+    <p class="decrypted-text" id="decrypted-output">
+    </p>
+</div>
+
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+// **** KEYWORD **** //
+// Get the button element
+//const keywordRunBtn = document.getElementById('keywordBtn');
+
+// Get the element with the ID "keyword"
+const keyword = document.getElementById('keywordText');
+
+const charParse = (string) => {
+    let stringUpper = string.toUpperCase();
+    return stringUpper.split('');
+}
+
+const getPos = (char) => {
+    //console.log(typeof(char))
+    const upperChar = char.toUpperCase();
+    for (let letter of CHARVAL) {
+        if (upperChar === letter.char){
+            return letter.pos;
+        }
+    }
+}
+
+//print letter positions
+const letterPositions = (array) => {
+    let positions = [];
+    for (let char of array){
+        positions.push(getPos(char));
+    }
+    return positions;
+}
+
+// **** KEYWORD EVENT LISTENER ****
+//      keywordRunBtn.addEventListener('click', () => {
+// Get the text content of the "keyword" element
+//const keywordText = keywordElement.textContent;
+
+// Log the text to the console
+  //        console.log(charParse(keyword.value));
+  //        console.log(letterPositions(charParse(keyword.value)));
+//});
+
+
+// **** PLAINTEXT ****
+const encodeRunBtn = document.getElementById('encodeBtn');
+const plaintext = document.getElementById('plaintext');
+const decodeRunBtn = document.getElementById('decodeBtn');
+
+const chunkPlaintext = (unchunked) => {
+    const chunkSize = keyword.value.length;
+    const regex = new RegExp(`(.{1,${chunkSize}})`, 'g');
+    const chunkedLowercase = unchunked.match(regex);
+    //console.log('lc: '+chunkedLowercase);
+    const chunkedUppercase = [];
+    for (let chunk of chunkedLowercase) {
+        chunkedUppercase.push(chunk.toUpperCase())
+    }
+    return chunkedUppercase;
+}
+
+const letterFromPos = (pos) => {
+    for (let letter of CHARVAL) {
+        if (pos === letter.pos){
+            return letter.char;
+        }
+    }
+}
+
+const rotateChunkUp = (chunk) => {
+    const makeUpper = chunk.toUpperCase();
+    const thisChunk = makeUpper.split('');
+    var origPos;
+    var keyPositions = letterPositions(charParse(keyword.value));
+    var shiftedPos;
+    //const newChunk = [];
+    var newChar;
+    thisChunk.forEach((element, index) => {
+        origPos = getPos(element);
+        shiftedPos = (origPos + keyPositions[index]) % 25;
+        newChar = letterFromPos(shiftedPos);
+        newChunk.push(newChar);
+    })
+    return newChunk;
+}
+
+const rotateChunkDown = (chunk) => {
+    const makeUpper = chunk.toUpperCase();
+    const thisChunk = makeUpper.split('');
+    var origPos;
+    var keyPositions = letterPositions(charParse(keyword.value));
+    var shiftedPos;
+    //const newChunk = [];
+    var newChar;
+    thisChunk.forEach((element, index) => {
+        origPos = getPos(element);
+        shiftedPos = (origPos - keyPositions[index]) < 1 ? ((origPos - keyPositions[index]) + 25) %25 : (origPos - keyPositions[index]) % 25;
+        newChar = letterFromPos(shiftedPos);
+        newChunk.push(newChar);
+    })
+    return newChunk;
+}
+
+
+const rotateChunksUp = (chunks,) => {
+    //const rotatedChunks = [];
+    for (let chunk of chunks) {
+        rotateChunkUp(chunk);
+    }
+    for (let char of newChunk) {
+        encodedText+=char;
+    }
+    return encodedText;
+}
+
+const rotateChunksDown = (chunks,) => {
+    //const rotatedChunks = [];
+    for (let chunk of chunks) {
+        rotateChunkDown(chunk);
+    }
+    for (let char of newChunk) {
+        encodedText+=char;
+    }
+    return encodedText;
+}
+
+let encodedText = '';
+    let newChunk = [];
+
+// ****  Encoding function **** //
+const encodeText = (text) => {
+    encodedText = '';
+    newChunk = [];
+    return rotateChunksUp(chunkPlaintext(text));
+}
+
+const decodeText = (text) => {
+    encodedText = '';
+    newChunk = [];
+    return rotateChunksDown(chunkPlaintext(text));
+}
+
+encodeRunBtn.addEventListener('click', () => {
+    const keywordLength = keyword.value.length;
+    //console.log(charParse(plaintext.value));
+    //console.log(letterPositions(charParse(plaintext.value)));
+    //console.log(chunkPlaintext(plaintext.value))
+    //console.log('testing the chunker ' + rotateChunk(keyword.value));
+    //console.log(encodeText(plaintext.value));
+
+    let encodedTextHTML = document.getElementById("encrypted-output");
+    encodedTextHTML.innerHTML = encodeText(plaintext.value);
+})
+
+decodeRunBtn.addEventListener('click', () => {
+    const keywordLength = keyword.value.length;
+    //console.log(decodeText(decodetext.value));
+
+    let decodedTextHTML = document.getElementById("decrypted-output");
+    decodedTextHTML.innerHTML = decodeText(decodetext.value);
+})
+});
+</script>
+
+
+<h2>As displayed:</h2>
+<div>
+    <p>
+        EMUFPHZLRFAXYUSDJKZLDKRNSHGNFIVJ
+YQTQUXQBQVYUVLLTREVJYQTMKYRDMFD
+VFPJUDEEHZWETZYVGWHKKQETGFQJNCE
+GGWHKK?DQMCPFQZDQMMIAGPFXHQRLG
+TIMVMZJANQLVKQEDAGDVFRPJUNGEUNA
+QZGZLECGYUXUEENJTBJLBQCRTBJDFHRR
+YIZETKZEMVDUFKSJHKFWHKUWQLSZFTI
+HHDDDUVH?DWKBFUFPWNTDFIYCUQZERE
+EVLDKFEZMOQQJLTTUGSYQPFEUNLAVIDX
+FLGGTEZ?FKZBSFDQVGOGIPUFXHHDRKF
+FHQNTGPUAECNUVPDJMQCLQUMUNEDFQ
+ELZZVRRGKFFVOEEXBDMVPNFQXEZLGRE
+DNQFMPNZGLFLPMRJQYALMGNUVPDXVKP
+DQUMEBEDMHDAFMJGZNUPLGEWJLLAETG
+ENDYAHROHNLSRHEOCPTEOIBIDYSHNAIA
+CHTNREYULDSLLSLLNOHSNOSMRWXMNE
+TPRNGATIHNRARPESLNNELEBLPIIACAE
+WMTWNDITEENRAHCTENEUDRETNHAEOE
+TFOLSEDTIWENHAEIOYTEYQHEENCTAYCR
+EIFTBRSPAMHHEWENATAMATEGYEERLB
+TEEFOASFIOTUETUAEOTOARMAEERTNRTI
+BSEDDNIAAHTTMSTEWPIEROAGRIEWFEB
+AECTDDHILCEIHSITEGOEAOSDDRYDLORIT
+RKLMLEHAGTDHARDPNEOHMGFMFEUHE
+ECDMRIPFEIMEHNLSSTTRTVDOHW?OBKR
+UOXOGHULBSOLIFBBWFLRVQQPRNGKSSO
+TWTQSJQSSEKZZWATJKLUDIAWINFBNYP
+VTTMZFPKWGDKZXTJCDIGKUHUAUEKCAR
+    </p>
+    <p>
+        ABCDEFGHIJKLMNOPQRSTUVWXYZABCD
+AKRYPTOSABCDEFGHIJLMNQUVWXZKRYP
+BRYPTOSABCDEFGHIJLMNQUVWXZKRYPT
+CYPTOSABCDEFGHIJLMNQUVWXZKRYPTO
+DPTOSABCDEFGHIJLMNQUVWXZKRYPTOS
+ETOSABCDEFGHIJLMNQUVWXZKRYPTOSA
+FOSABCDEFGHIJLMNQUVWXZKRYPTOSAB
+GSABCDEFGHIJLMNQUVWXZKRYPTOSABC
+HABCDEFGHIJLMNQUVWXZKRYPTOSABCD
+IBCDEFGHIJLMNQUVWXZKRYPTOSABCDE
+JCDEFGHIJLMNQUVWXZKRYPTOSABCDEF
+KDEFGHIJLMNQUVWXZKRYPTOSABCDEFG
+LEFGHIJLMNQUVWXZKRYPTOSABCDEFGH
+MFGHIJLMNQUVWXZKRYPTOSABCDEFGHI
+NGHIJLMNQUVWXZKRYPTOSABCDEFGHIJL
+OHIJLMNQUVWXZKRYPTOSABCDEFGHIJL
+PIJLMNQUVWXZKRYPTOSABCDEFGHIJLM
+QJLMNQUVWXZKRYPTOSABCDEFGHIJLMN
+RLMNQUVWXZKRYPTOSABCDEFGHIJLMNQ
+SMNQUVWXZKRYPTOSABCDEFGHIJLMNQU
+TNQUVWXZKRYPTOSABCDEFGHIJLMNQUV
+UQUVWXZKRYPTOSABCDEFGHIJLMNQUVW
+VUVWXZKRYPTOSABCDEFGHIJLMNQUVWX
+WVWXZKRYPTOSABCDEFGHIJLMNQUVWXZ
+XWXZKRYPTOSABCDEFGHIJLMNQUVWXZK
+YXZKRYPTOSABCDEFGHIJLMNQUVWXZKR
+ZZKRYPTOSABCDEFGHIJLMNQUVWXZKRY
+ ABCDEFGHIJKLMNOPQRSTUVWXYZABCD
+    </p>
+</div>
+
+<h2>Solved Passages:</h2>
+<div>
+    <p>
+        BETWEEN SUBTLE SHADING AND THE ABSENCE OF LIGHT LIES THE NUANCE OF IQLUSION
+    </p>
+    <p>
+        IT WAS TOTALLY INVISIBLE HOWS THAT POSSIBLE ? THEY USED THE EARTHS MAGNETIC FIELD X THE INFORMATION WAS GATHERED AND TRANSMITTED UNDERGRUUND TO AN UNKNOWN LOCATION X DOES LANGLEY KNOW ABOUT THIS ? THEY SHOULD ITS BURIED OUT THERE SOMEWHERE X WHO KNOWS THE EXACT LOCATION ? ONLY WW THIS WAS HIS LAST MESSAGE X THIRTY EIGHT DEGREES FIFTY SEVEN MINUTES SIX POINT FIVE SECONDS NORTH SEVENTY SEVEN DEGREES EIGHT MINUTES FORTY FOUR SECONDS WEST X LAYER TWO
+    </p>
+    <p>
+        SLOWLY DESPARATLY SLOWLY THE REMAINS OF PASSAGE DEBRIS THAT ENCUMBERED THE LOWER PART OF THE DOORWAY WAS REMOVED WITH TREMBLING HANDS I MADE A TINY BREACH IN THE UPPER LEFT HAND CORNER AND THEN WIDENING THE HOLE A LITTLE I INSERTED THE CANDLE AND PEERED IN THE HOT AIR ESCAPING FROM THE CHAMBER CAUSED THE FLAME TO FLICKER BUT PRESENTLY DETAILS OF THE ROOM WITHIN EMERGED FROM THE MIST X CAN YOU SEE ANYTHING Q ?
+    </p>
+</div>
+<h2>Plaintext:</h2>
+<div>
+<div>
+    K1: "EMUFPHZLRFAXYUSDJKZLDKRNSHGNFIVJ YQTQUXQBQVYUVLLTREVJYQTMKYRDMFD"
+</div>
+<div>
+    K2: "VFPJUDEEHZWETZYVGWHKKQETGFQJNCE GGWHKK?DQMCPFQZDQMMIAGPFXHQRLG TIMVMZJANQLVKQEDAGDVFRPJUNGEUNA QZGZLECGYUXUEENJTBJLBQCRTBJDFHRR YIZETKZEMVDUFKSJHKFWHKUWQLSZFTI HHDDDUVH?DWKBFUFPWNTDFIYCUQZERE EVLDKFEZMOQQJLTTUGSYQPFEUNLAVIDX FLGGTEZ?FKZBSFDQVGOGIPUFXHHDRKF FHQNTGPUAECNUVPDJMQCLQUMUNEDFQ ELZZVRRGKFFVOEEXBDMVPNFQXEZLGRE DNQFMPNZGLFLPMRJQYALMGNUVPDXVKP DQUMEBEDMHDAFMJGZNUPLGEWJLLAETG"
+</div>
+<div>
+    K3: "ENDYAHROHNLSRHEOCPTEOIBIDYSHNAIA CHTNREYULDSLLSLLNOHSNOSMRWXMNE TPRNGATIHNRARPESLNNELEBLPIIACAE WMTWNDITEENRAHCTENEUDRETNHAEOE TFOLSEDTIWENHAEIOYTEYQHEENCTAYCR EIFTBRSPAMHHEWENATAMATEGYEERLB TEEFOASFIOTUETUAEOTOARMAEERTNRTI BSEDDNIAAHTTMSTEWPIEROAGRIEWFEB AECTDDHILCEIHSITEGOEAOSDDRYDLORIT RKLMLEHAGTDHARDPNEOHMGFMFEUHE ECDMRIPFEIMEHNLSSTTRTVDOHW?"
+
+</div>
+<div>
+    K4: "OBKR UOXOGHULBSOLIFBBWFLRVQQPRNGKSSO TWTQSJQSSEKZZWATJKLUDIAWINFBNYP VTTMZFPKWGDKZXTJCDIGKUHUAUEKCAR"
+</div>
+</div>
+
+
+<textarea spellcheck="false" rows="4" cols="31" type="text" id="main-text" name="text" required minlength="1" maxlength="999" size="100"></textarea>
+<button>&plus;</button><button>&minus;</button>
+
+</body>
+
+<style>
+    body, textarea {
+        font-family: "Space Mono", monospace;
+        font-weight: 400;
+        font-style: normal;
+        text-transform: uppercase;
+    }
+
+    .textarea-wrapper {
+        display: flex;
+        flex-direction: row;
+
+    }
+    /*
+.space-mono-regular {
+  font-family: "Space Mono", monospace;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.space-mono-bold {
+  font-family: "Space Mono", monospace;
+  font-weight: 700;
+  font-style: normal;
+}
+
+.space-mono-regular-italic {
+  font-family: "Space Mono", monospace;
+  font-weight: 400;
+  font-style: italic;
+}
+
+.space-mono-bold-italic {
+  font-family: "Space Mono", monospace;
+  font-weight: 700;
+  font-style: italic;
+}
+
+    */
+</style>
+
+</html>
