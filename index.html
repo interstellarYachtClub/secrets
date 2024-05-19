@@ -135,7 +135,7 @@ const rotateChunkDown = (chunk) => {
     var newChar;
     thisChunk.forEach((element, index) => {
         origPos = getPos(element);
-        shiftedPos = ((origPos - keyPositions[index]) < 1) ? (((origPos - keyPositions[index]) + CHARCOUNT) % CHARCOUNT) : (origPos - keyPositions[index]) % CHARCOUNT;
+        shiftedPos = ((origPos - keyPositions[index]) < 0) ? (((origPos - keyPositions[index]) + CHARCOUNT) % CHARCOUNT) : (origPos - keyPositions[index]) % CHARCOUNT;
         newChar = letterFromPos(shiftedPos);
         newChunk.push(newChar);
     })
