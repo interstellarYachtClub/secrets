@@ -13,16 +13,16 @@
 <h1>keep it secret, keep it safe</h1>
 
 <div class="textarea-wrapper keyword-input">
-    <input spellcheck="false" rows="1" cols="33" type="text" id="keywordText" name="keywordText" required minlength="1" maxlength="99" size="25" ></input> <!--<button id="keywordBtn">Keyword</button>-->
+    <input spellcheck="false" rows="1" cols="33" type="text" id="keywordText" name="keywordText" required minlength="1" maxlength="1024" size="25" ></input> <!--<button id="keywordBtn">Keyword</button>-->
     <label for="keywordText">keyword</label>
 </div>
 <div class="textarea-wrapper plaintext-input">
-    <textarea spellcheck="false" rows="1" cols="33" type="text" id="plaintext" name="plaintext" required minlength="1" maxlength="99" size="25" ></textarea>
+    <textarea spellcheck="false" rows="1" cols="33" type="text" id="plaintext" name="plaintext" required minlength="1" maxlength="1048576" size="25" ></textarea>
     <label for="plaintext">plaintext to encrypt</label>
     <button id="encodeBtn">encrypt</button>
 </div>
 <div class="textarea-wrapper decoded-text-input">
-    <textarea spellcheck="false" rows="1" cols="33" type="text" id="decodetext" name="decodetext" required minlength="1" maxlength="99" size="25" ></textarea>
+    <textarea spellcheck="false" rows="1" cols="33" type="text" id="decodetext" name="decodetext" required minlength="1" maxlength="1048576" size="25" ></textarea>
     <label for="decodetext" >text to decrypt</label>
     <button id="decodeBtn">decrypt</button>
 </div>
