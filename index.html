@@ -210,7 +210,7 @@ decodeRunBtn.addEventListener('click', () => {
     //console.log(decodeText(decodetext.value));
 
     let decodedTextHTML = document.getElementById("decrypted-output");
-    decodedTextHTML.textContent = escapeHtml(decodeText(decodetext.value));
+    decodedTextHTML.textContent = decodeText(decodetext.value);
 })
 });
 </script>
